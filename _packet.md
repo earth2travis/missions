@@ -9,11 +9,13 @@ budget:
 
 # Flight Plan: [MISSION NAME]
 
-## Sizing Gate
-Why is this a Mission and not a Task?
+## Sizing Gate (Self-Assessment)
+Is this a Mission or a Task?
 
-A Mission requires 3+ of: multi-agent, multi-session, multi-objective, coordination required, method ambiguous.
-If this is a task (one agent, one session, one objective), use /goal directly instead.
+A **Mission** is a bounded campaign requiring coordination across agents, sessions, or domains.
+A **Task** is work one agent can complete in one session with one `/goal`.
+
+If this is a task, consider using `/goal` directly for speed. If this is a mission, proceed.
 
 ## Commander's Intent
 What must be true, and why does it matter?
