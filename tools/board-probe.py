@@ -62,6 +62,16 @@ def main():
                 print(f"  summary: {r['summary']}")
             if r["error"]:
                 print(f"  error:   {r['error']}")
+        comments = db.execute(
+            "SELECT author, body, created_at FROM task_comments"
+            " WHERE task_id = ? ORDER BY id",
+            (run_task,),
+        ).fetchall()
+        if comments:
+            print(f"\nCOMMENTS ({len(comments)}):")
+            for c in comments:
+                print(f"--- {c['author']} @ {utc(c['created_at'])} ---")
+                print(c["body"])
         return
 
     rows = db.execute(
