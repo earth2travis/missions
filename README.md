@@ -42,6 +42,31 @@ The orchestration theory (intent cascades, verification gates, bounded delegatio
 
 Skills live in [`skills/`](skills/) (source of truth) and install into `~/.hermes/skills/` for the Hermes agent.
 
+## Install the Skills
+
+This repo is a Hermes **skills tap** (skills live under `skills/`, one directory per skill). On the machine where your Hermes fleet runs:
+
+```bash
+# Add the tap, then install each skill through the Skills Hub
+# (quarantine + security scan included):
+hermes skills tap add earth2travis/missions
+hermes skills install earth2travis/missions/define-mission --category devops
+hermes skills install earth2travis/missions/launch-mission --category devops
+hermes skills install earth2travis/missions/debrief-mission --category devops
+
+# Later: pick up new versions
+hermes skills update
+```
+
+Or install manually from a clone:
+
+```bash
+git clone git@github.com:earth2travis/missions.git
+cp -R missions/skills/* ~/.hermes/skills/devops/
+```
+
+One-time prep worth doing: `hermes profile describe --all --auto` generates a capability description for every profile from its installed skills — `launch-mission` routes mission lanes by matching against these.
+
 ## Your First Mission
 
 1. Tell your Hermes agent what you want: *"I want every API route to return structured error codes, because silent auth failures are security incidents waiting to happen."*
