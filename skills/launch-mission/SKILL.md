@@ -1,7 +1,7 @@
 ---
 name: launch-mission
 description: Compile an approved Flight Plan into Hermes Kanban cards and launch the mission. Runs automatic pre-flight Go/No-Go checks, presents the card graph for operator approval, then issues real kanban_create calls with dependencies, budgets, goal_mode verification, and human gates. The deep-integration skill of the missions.md system.
-version: 1.0.0
+version: 1.1.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -152,6 +152,8 @@ t1 = kanban_create(
     body=BODY_T1,            # see card body anatomy below
     goal_mode=True,
     goal_max_turns=15,
+    workspace_kind="dir",                       # persistent artifact → shared dir
+    workspace_path="/srv/missions-site",        # same path on every collaborating card
     tenant=tenant,
 )["task_id"]
 
@@ -162,6 +164,8 @@ t2 = kanban_create(
     parents=[t1],
     goal_mode=True,
     goal_max_turns=20,
+    workspace_kind="dir",                       # repeat explicitly — orchestrator-created
+    workspace_path="/srv/missions-site",        # cards do NOT inherit workspaces
     tenant=tenant,
 )["task_id"]
 ```
@@ -198,6 +202,28 @@ HANDOFF
 
 Mission: <slug> | Flight Plan: missions/<slug>.md | Criteria owned: 1, 3
 ```
+
+### Workspaces: where the work product lives
+
+`kanban_create` defaults to `workspace_kind="scratch"` — a throwaway tmp dir,
+garbage-collected when the task archives. **Scratch is wrong for any mission
+that produces a persistent artifact.** Decide the workspace per card before
+creating anything:
+
+| Mission shape | Workspace |
+|---|---|
+| Research / analysis (artifact is the handoff text) | `scratch` (default) is fine |
+| Cards collaborating on files (site, codebase, docs) | `workspace_kind="dir"`, `workspace_path=<absolute shared path>` — same path on every card in the lane |
+| Code changes that should land as commits/PRs | `workspace_kind="worktree"` — workers commit on a task branch |
+
+The shared path must exist (or be a repo clone) before launch; verify it in
+pre-flight when the graph needs one. State the workspace in the card graph
+you present — the operator should see where the work product will live.
+
+Two more per-card controls worth using when they fit:
+- `max_runtime_seconds` — wall-clock circuit breaker alongside `goal_max_turns`.
+- `skills=[...]` — force-load specific skills into the worker for that card
+  (appended to the dispatcher's built-in `kanban-worker`).
 
 ### Wiring the Flight Plan's controls onto the board
 
