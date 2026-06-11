@@ -1,6 +1,6 @@
 ---
 title: "Flight Plan: Public missions.md Site"
-status: launched # draft → ready → launched → complete
+status: complete # draft → ready → launched → complete
 priority: normal
 budget:
   tokens: 500000
