@@ -77,6 +77,23 @@ Know what the fallback costs: a manual copy bypasses Hub metadata, so
 If you used the fallback, say so prominently in your report and recommend
 retrying the tap path later to restore update tracking.
 
+For later updates: `hermes skills update <skill-name>` updates one skill
+surgically; bare `hermes skills update` updates everything tap-installed.
+
+## Step 2b — Set the missions repo location
+
+define-mission writes Flight Plans into a clone of the missions repo,
+resolved via the `MISSIONS_REPO` env var. Set it once so every future
+session resolves silently:
+
+```
+git clone https://github.com/earth2travis/missions.git ~/missions   # or git pull if it exists
+echo "MISSIONS_REPO=$HOME/missions" >> ~/.hermes/.env               # absolute path — ~ does not expand in .env
+```
+
+Adjust the path if the operator keeps repos elsewhere. Include the chosen
+path in your report.
+
 ## Step 3 — Fleet prep (profile descriptions)
 
 `launch-mission` routes mission lanes by matching against the `description`

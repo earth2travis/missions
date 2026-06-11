@@ -23,7 +23,7 @@ cheaper. Your call either way — this check never blocks a launch.
 What must be true, and why does it matter?
 
 ## Constraints
-- Budget: [tokens / time / turns]
+- Budget: [tokens / time / turns — mirror of the frontmatter `budget:` block, which is canonical]
 - Pause conditions: [e.g., test failure, security impact, build break]
 - Human gates: [e.g., merge approval, production deploy, external commit]
 

@@ -1,7 +1,7 @@
 ---
 name: define-mission
 description: Turn raw operator intent into a one-page Flight Plan — the human-facing artifact of the missions.md system. Captures Commander's Intent, Constraints, and Success Criteria; advises on mission-vs-task sizing without ever blocking. Does NOT create Kanban cards (that is launch-mission's job).
-version: 1.0.0
+version: 1.1.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -76,7 +76,9 @@ writing tasks — delete it and state the outcome instead.
 ### Constraints
 - **Budget:** propose defaults scaled to the work (tokens, time, turns). The
   operator adjusts; never leave it blank — unbounded delegation is a design
-  violation.
+  violation. **The frontmatter `budget:` block is canonical** — that is what
+  launch-mission reads. The Constraints bullet restates it in prose for the
+  human; keep the two identical.
 - **Pause conditions:** what should stop the line (test failure, build break,
   security impact, destructive operation). Propose from context.
 - **Human gates:** where the operator must approve before work proceeds
@@ -95,6 +97,12 @@ Three to six, each one **outcome-oriented and verifiable**:
 - These criteria become the acceptance criteria the `goal_mode` judge enforces
   on every Kanban card downstream. Vague criteria here means a blind judge
   there. This is the highest-leverage section of the page.
+- **Soft qualities are not criteria.** When the operator gives direction like
+  "low-friction" or "feels fast," either translate it into a verifiable
+  proxy (e.g., "Lighthouse performance 90+ on the landing page") — and label
+  it `(proxy for: low-friction)` so the operator can strike or replace it at
+  approval — or leave it in Context as direction for the workers. Never
+  leave an unverifiable adjective standing in Success Criteria.
 
 ### Context
 Links, file paths, Substrate `[[wikilinks]]`, prior decisions, operator notes.

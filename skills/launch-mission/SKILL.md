@@ -1,7 +1,7 @@
 ---
 name: launch-mission
 description: Compile an approved Flight Plan into Hermes Kanban cards and launch the mission. Runs automatic pre-flight Go/No-Go checks, presents the card graph for operator approval, then issues real kanban_create calls with dependencies, budgets, goal_mode verification, and human gates. The deep-integration skill of the missions.md system.
-version: 1.1.0
+version: 1.2.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -77,6 +77,7 @@ Run every check, then report a single Go/No-Go poll. Two severities:
 | Intent is an outcome, not a step list | No "first… then… finally…" |
 | Success Criteria are outcome-oriented and verifiable | A judge, test, or human can answer yes/no |
 | Budget is set | Tokens/time/turns present in frontmatter |
+| Frontmatter budget matches Constraints prose | The frontmatter `budget:` block is canonical (it is what you read); if the prose drifted, flag the mismatch and have the operator confirm which number stands |
 | Pause conditions and human gates declared | Especially for anything irreversible |
 | Plan status is `ready` | If `draft`, confirm the operator approved it |
 
