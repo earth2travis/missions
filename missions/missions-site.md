@@ -106,3 +106,5 @@ exists, the tool stays private and the ideas stay locked in a README.
 | t_95b5dcd0 | [m:missions-site] review: criteria 1,3,5,6 + content/design gate | inspector_general | t_62fc052c | review-required: content+design approval |
 | t_862f3c59 | [m:missions-site] verify install path end-to-end (criterion 2) | intelligence_officer | t_62fc052c | — |
 | t_340d7b29 | [m:missions-site] gate + deploy: repo public, Cloudflare live (criterion 4) | combat_engineer | t_95b5dcd0, t_862f3c59 | review-required ×2: repo public, deploy |
+| t_70409598 | [m:missions-site] rework: install page matches corrected install docs | combat_engineer | — | — |
+| t_3a5d08a9 | [m:missions-site] re-verify install path end-to-end (criterion 2, second attempt) | intelligence_officer | t_70409598 | — |
