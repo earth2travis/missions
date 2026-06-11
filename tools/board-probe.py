@@ -45,8 +45,9 @@ def main():
     if run_task:
         rows = db.execute(
             "SELECT id, profile, status, outcome, started_at, ended_at,"
-            "       last_heartbeat_at, substr(coalesce(summary,''),1,300) AS summary,"
-            "       substr(coalesce(error,''),1,300) AS error"
+            "       last_heartbeat_at, coalesce(summary,'') AS summary,"
+            "       coalesce(metadata,'') AS metadata,"
+            "       coalesce(error,'') AS error"
             " FROM task_runs WHERE task_id = ? ORDER BY id",
             (run_task,),
         ).fetchall()
@@ -60,6 +61,8 @@ def main():
                   f"  heartbeat={hb}")
             if r["summary"]:
                 print(f"  summary: {r['summary']}")
+            if r["metadata"]:
+                print(f"  metadata: {r['metadata']}")
             if r["error"]:
                 print(f"  error:   {r['error']}")
         comments = db.execute(
