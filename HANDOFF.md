@@ -1,154 +1,143 @@
-# HANDOFF: missions.md MVP — Session 2026-06-10 (supersedes prior handoff)
+# HANDOFF: missions.md — Session 2026-06-11 (supersedes prior handoff)
 
 ## SITREP
 
-The architecture was simplified from four layers to two. The hidden Mission
-Contract layer is gone; Flight Plans now compile directly to Hermes Kanban
-cards. The skill trio was renamed and re-scoped. The repo was cleaned up to
-match. The `define-mission` skill is written and installed. `launch-mission`
-and `debrief-mission` are next.
-
-**Correction to the prior handoff:** it claimed three skills lived in
-`~/.hermes/skills/devops/`. They did not — that directory contained only the
-bundled kanban skills. The only prior versions were the archived pre-research
-drafts. Verify claims like this on disk before building on them.
+The first real mission has been flown end to end and the system survived
+contact with reality. `missions-site` launched 03:10 UTC, ran 17 runs across
+10 cards, hit honest failures at exactly the places the theory predicted —
+and every loss was caught, bounded, and fixed in minutes. The site is live:
+**https://missions-site.sivart-36d.workers.dev** (all six criteria verified
+on the deployed artifact, Lighthouse P97/A96 on the edge). The After-Action
+Review exists (`missions/missions-site.aar.md`, verdict: intent-survived,
+operator-confirmed), and its Lessons are already compiled into the skills.
+The AAR is the proof-of-value artifact this project was built to produce.
 
 ---
 
-## What We Are Building
+## What This Is
 
-A mission orchestration system: the human writes a one-page Flight Plan, a
-Hermes agent fleet executes it via Kanban automation, and an After-Action
-Review proves whether intent survived. NASA Mission Control feel: clean,
-decisive, low-friction.
+A mission orchestration system on Hermes Kanban. The operator writes a
+one-page **Flight Plan** (Commander's Intent, Constraints, Success Criteria,
+Context); `launch-mission` compiles it directly to Kanban cards;
+`debrief-mission` proves whether intent survived. Two layers, no hidden
+contract (`archive/contract-era/` explains the retired layer). The repo
+doubles as a Hermes skills tap: `hermes skills tap add earth2travis/missions`.
 
-### The Architecture (Two Layers)
-
-```
-IDEA ──▶ define-mission ──▶ Flight Plan (one page — the only thing you write)
-                                │
-                       launch-mission
-                       ├─ pre-flight Go/No-Go checks (automatic)
-                       └─ kanban_create ×N ──▶ Hermes fleet executes
-                                │
-                       debrief-mission
-                       └─ task_runs ──▶ After-Action Review
-```
-
-| Layer | Owned by | What it is |
+| Skill | Version | Job |
 |---|---|---|
-| Flight Plan | Human | Commander's Intent, Constraints, Success Criteria, Context |
-| Hermes Kanban | System | Cards with `parents=`, `goal_mode`, budgets, `kanban_block()` gates |
+| define-mission | 1.3.0 | intent → Flight Plan (advisory sizing, proxy-labeled criteria, fallback observers for external criteria) |
+| launch-mission | 1.5.0 | Flight Plan → cards: Go/No-Go poll, backbrief graph, verification discipline, workspaces, gates |
+| debrief-mission | 1.2.0 | board history → AAR (evidence-graded, ledger reconciles, artifacts observed not trusted) |
 
-There is no hidden Mission Contract and no separate `goals/` directory. Goal
-text lives in Kanban card bodies, where the `goal_mode` judge reads it.
+Source of truth: `skills/` in this repo. Installed at `~/.hermes/skills/devops/`
+locally and on the fleet. All three scan **safe** with the Hub scanner — keep
+it that way (see Conventions).
 
----
+## The Cast
 
-## Decisions Made (2026-06-10, user-approved)
+- **Operator: Travis (Ξ2T, earth2travis).** 2026 word: "Relax" — ship working
+  things, never over-engineer. Operator-first, minimal friction, NASA Mission
+  Control flavor. The system advises; the operator decides; never block.
+- **Architect (you, on Travis's Mac).** Repo at `/Users/earth/Sites/missions`.
+  Full Hermes source at `~/.hermes/hermes-agent` — **verify every claim about
+  Hermes behavior against that source before patching anything.** You design
+  and patch skills, audit field reports, commit and push.
+- **Sivart:** Hermes agent on the VPS "alchemist" (user `sivart`), running a
+  7-profile fleet (default/orchestrator, campaign_scribe, combat_engineer,
+  inspector_general, intelligence_officer, signal_analyst, +1). Travis relays
+  between you and her by pasting. She has her own GitHub account
+  (collaborator on earth2travis repos, pushes over SSH — **never PATs in
+  chat; credentials go in the 1Password vault, reached via `op` under the
+  Hermes env**). She also pushes to this repo's main —
+  **always `git pull --rebase` before pushing.**
 
-| Decision | Supersedes |
-|---|---|
-| No hidden Mission Contract — Flight Plan compiles directly to Kanban cards | Four-layer architecture in prior handoff |
-| Trio is `define-mission` / `launch-mission` / `debrief-mission` | `define/plan/validate` naming |
-| Validation folds into `launch-mission` as automatic pre-flight Go/No-Go checks | Standalone `validate-mission` skill |
-| After-Action Review is the third skill (`debrief-mission`), generated from `task_runs` | "AAR as later subcommand" open question |
-| First real mission: build the missions.md public site (genuinely mission-sized) | README demo as first run |
-| Minimal fleet (builder + reviewer + default-as-orchestrator) set up as part of MVP | — |
-| Skills live in repo `skills/` (source of truth), installed to `~/.hermes/skills/devops/` | — |
-| Prove on personal OS first; target open-source + Hermes communities second | — |
-| Sizing is advisory, never enforced (unchanged, now consistent across all docs) | Contradictory "reject" language in `concepts/mission-sizing.md` |
+## Conventions (non-negotiable — each one came from a field failure)
 
-Standing preferences (unchanged): operator-first; no enforcement gates; NASA
-flavor with military terminology welcome; no separate app — Hermes is the
-dashboard; minimal human interaction; "Relax" — do not over-engineer.
+- Every operator ask ends in a `DECISION REQUIRED` block: numbered decisions,
+  each naming the literal reply and its effect. Never bundle a NO-GO remedy
+  into a launch word. Status-only messages end `No action required.`
+- Host-dependent instructions ship probe / expected output / named remedy.
+- **Probes pasted to terminals are single-line or repo files — never
+  heredocs, never long one-liners** (terminal paste mangles both). The kit:
+  `tools/board-probe.py` — board overview per mission slug, `--runs <id>`
+  for full run history + metadata + comments. Read-only at the SQLite layer.
+- **Verification discipline** (now in launch-mission 1.5.0): can't-verify ⇒
+  block, never complete on a toolchain's success output; deploy cards verify
+  from outside the toolchain with a named fallback observer; verification
+  cards whose verdict is FAIL block instead of completing.
+- Blameless analysis: grade the plan and the cards, not the crew.
+- Skill text must pass `tools/skills_guard.py` (in hermes-agent): never write
+  literal Hermes-config or agent-config file paths in a SKILL.md — the
+  scanner grades them dangerous and blocks the tap install. Rescan all three
+  skills before every push that touches them.
 
----
+## Hermes Facts (verified against source — don't re-derive)
 
-## What We Did This Session
+- `task_runs` holds per-attempt outcome/timestamps/summary/metadata/error;
+  **no tokens or turns recorded** — cards make the `usage` self-report part
+  of acceptance criteria; debrief labels it self-reported, never estimates.
+  Run metadata lives on runs, not the task object.
+- `kanban_create` params: parents, goal_mode, goal_max_turns,
+  workspace_kind/workspace_path, skills, max_runtime_seconds, tenant.
+  **No metadata param** — mission identity = `[m:<slug>]` title prefix +
+  body footer + Launch Record table in the Flight Plan.
+- Orchestrator-created cards do NOT inherit workspaces; pass explicitly.
+  Scratch workspaces are GC'd at archive — no path-shaped handoffs on
+  scratch cards (the scratch consistency rule).
+- Dispatcher runs **embedded in the gateway** when
+  `kanban.dispatch_in_gateway` is true-or-absent — no daemon process exists
+  and that absence is healthy. Block reason → last run's summary; review
+  packets → `task_comments`. Heartbeat staleness threshold: 3600s.
+- `hermes skills update <name>` is surgical; `uninstall` needs a TTY (no
+  `--yes` — upstream issue drafted, NOT filed) and only knows Hub skills.
+- `hermes profile describe <name> --text "..."` sets a description with no
+  LLM; `--auto` needs the `auxiliary.*` client configured in config.yaml.
+- Worker sandboxes filter networks (one blocked all `.dev` domains) — this
+  is why verification discipline exists.
+- Default board DB: `~/.hermes/kanban.db`; read-only access only.
 
-1. **Repo cleanup**
-   - Rewrote `README.md` around the operator-first story and two-layer architecture
-   - Archived contract-era artifacts to `archive/contract-era/` with an explanatory README: `_template.md`, `evolution-plan.md`, the demo contract, the demo `/goal` files, and the demo Flight Plan (its goal — an accessible README — was fulfilled by the rewrite)
-   - Removed the now-empty `goals/` directory
-   - Fixed `concepts/mission-sizing.md`: sizing advice is advisory, never a rejection
-   - Rewrote `concepts/structural-limits.md` for the direct-to-Kanban architecture
-   - Refreshed `_packet.md` (Flight Plan template): sizing check reworded as informational, status lifecycle documented
-2. **`define-mission` skill** — written at `skills/define-mission/SKILL.md`
-   (source of truth) and installed to `~/.hermes/skills/devops/define-mission/`
-3. **`launch-mission` skill** — written at `skills/launch-mission/SKILL.md`,
-   installed alongside. Pre-flight Go/No-Go poll (mechanical NO-GOs vs.
-   advisories), backbrief card graph, parents-first creation with captured
-   ids, four-part card body anatomy, gates via `review-required:` blocks,
-   Launch Record appended to the Flight Plan (the card-id table
-   `debrief-mission` will read), workers instructed to self-report usage
-4. **`debrief-mission` skill** — written at `skills/debrief-mission/SKILL.md`,
-   installed alongside. Launch Record as card index (title-prefix scan as
-   fallback), read-only board access (tools or `sqlite3 mode=ro`), honest
-   cost ledger (wall-clock/attempts/gate-latency from the board; usage only
-   if self-reported), Success Criteria scoreboard graded against cited
-   evidence, blameless residual-loss analysis, mid-mission status-read mode,
-   closes with the operator's Paragraph 2 verdict
+## Field Findings With Shelf Life (from the missions-site mission)
 
----
+- **wrangler 3 cannot statically detect vinext 0.1.1's re-exported default
+  fetch handler** — uploads `handlers: []`, Cloudflare never activates the
+  deployment, workers.dev serves its placeholder. wrangler 4 fixes it.
+- `run_worker_first: true` (bare bool) routes static assets into the SSR
+  worker → asset 404s. Use a rule array with at least one positive rule:
+  `["/*", "!/_next/static/*", "!/favicon.svg"]`.
+- vinext App Router mode with wrangler.toml present requires
+  `@cloudflare/vite-plugin`; a stray root `index.html` makes Vite serve `/`
+  as a static SPA shell, bypassing SSR entirely.
+- "In the vault" is not "usable from this host" — probe credentials
+  (reachable AND valid for the target API) before launch, one curl each.
 
-## Hermes Reality Check (verified on this machine)
+## Next Steps (operator's word required for each)
 
-- `hermes profile list` shows a single profile: `default`. Gateway stopped.
-- `~/.hermes/skills/devops/` bundles `kanban-orchestrator`, `kanban-worker`,
-  `webhook-subscriptions` — read these before writing `launch-mission`; they
-  document the real tool contracts.
-- Key primitives: `kanban_create(parents=[...], goal_mode=True, goal_max_turns=N)`,
-  `kanban_block()`, `kanban_complete(summary, metadata)`, `task_runs` in SQLite,
-  `hermes kanban reclaim/reassign`.
-- The dispatcher **silently drops** cards assigned to unknown profiles. Always
-  discover profiles (`hermes profile list`) before assigning. Never invent names.
-
----
-
-## Next Steps (Priority Order)
-
-1. **Configure the minimal fleet** — 2–3 profiles (builder, reviewer; `default`
-   as orchestrator), gateway running. User said to check in before touching
-   profiles.
-2. **First real mission: the missions.md public site** — write its Flight Plan
-   with `define-mission`, launch it, debrief it. The AAR is the proof of value
-   and the launch story for the Hermes community.
-
-**Schema reality (verified in `hermes_cli/kanban_db.py`):** the board records
-no tokens or turns. `task_runs` has per-attempt outcome, timestamps, summary,
-metadata JSON, error. So: `launch-mission` instructs workers to self-report
-`usage` in handoff metadata; `debrief-mission` computes wall-clock, attempts,
-and gate latency from the board, labels usage as self-reported, and says
-"not recorded" rather than estimating. DB path: `$HERMES_KANBAN_DB`, else
-`~/.hermes/kanban.db` (default board), else
-`~/.hermes/kanban/boards/<slug>/kanban.db`. Read-only access only.
-
----
+1. **File the upstream issues** (both drafted in spirit, neither filed):
+   `hermes skills uninstall --yes` to NousResearch/hermes-agent; the
+   wrangler-3 handler-detection finding to cloudflare/vinext.
+2. **Custom domain** — attach to the Cloudflare deployment (DNS was gated
+   out of mission scope; site is domain-ready, no hardcoded URLs).
+3. **Community launch story** — the material exists: a live site built by
+   the system it describes, plus an AAR proving what delegation cost.
+4. **Template library** — candidate next iteration once a second mission
+   has flown.
+5. Long-term: contribute the skills to the Hermes ecosystem.
 
 ## Files to Read on Resume
 
-1. `README.md` — the story and architecture, current
-2. `_packet.md` — the Flight Plan template
-3. `skills/define-mission/SKILL.md` — the first skill
-4. `concepts/mission-sizing.md` — advisory sizing rules the skills follow
-5. `~/.hermes/skills/devops/kanban-orchestrator/SKILL.md` — real Kanban tool contracts
-6. `archive/contract-era/README.md` — why the contract layer was retired
-
----
-
-## Context to Carry Forward
-
-- The user is **Ξ2T (Travis)**, earth2travis. Operator-first, minimal friction,
-  clean abstractions. 2026 word: **"Relax."** Ship working things.
-- `missions.md` is the brand. Substrate = knowledge; missions repo = operations.
-  Strict separation.
-- The system suggests; it never blocks. The operator decides.
-- The ecosystem goal: skills contributable upstream to Hermes; missions.md as
-  the methodology home.
+1. `README.md` — story and architecture
+2. `missions/missions-site.md` + `missions/missions-site.aar.md` — the first
+   mission's Flight Plan, Launch Record, and AAR (the system's best
+   self-documentation)
+3. `skills/*/SKILL.md` — current contracts, post-AAR versions
+4. `docs/install-prompt.md` — onboarding path, verified end-to-end in a
+   clean environment
+5. `~/.hermes/skills/devops/kanban-orchestrator/SKILL.md` +
+   `kanban-worker/SKILL.md` — the runtime's real contracts
+6. `git log --oneline -20` — the session-by-session record
 
 ## The Commitment
 
-Build the simplest thing that works. Two layers, three skills, one real
-mission. The goal is a system that makes multi-agent orchestration feel as
-simple as writing a one-page Flight Plan — and proves it with a debrief.
+Build the simplest thing that works. Two layers, three skills — and now one
+real mission flown, debriefed, and compiled back into the system. The loss
+was visible, bounded, and small. Keep it that way.
