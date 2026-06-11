@@ -36,10 +36,20 @@ The boundary: `launch-mission` replaces both `plan-mission` and
 `validate-mission` (validation now runs automatically at launch);
 `mission-contracts` is retired entirely.
 
-Remove them (`hermes skills uninstall <name>`, or delete the directory if
-the Hub doesn't know them) so routing is unambiguous — "plan a mission" must
-resolve to exactly one skill. List anything you removed in your report. Do
-not touch skills outside this list.
+Remove them so routing is unambiguous — "plan a mission" must resolve to
+exactly one skill. Two things to know about removal before you start:
+
+- Probe: `hermes skills uninstall <name>` — **interactive terminal only.**
+  In a non-interactive terminal the confirm prompt cannot be answered and
+  auto-cancels with a quiet "Cancelled." (uninstall has no `--yes` flag,
+  unlike install). Expected on success: an "Uninstalled" confirmation.
+- **If it reports "not a hub-installed skill":** the skill is local and was
+  never Hub-tracked. Remedy: remove the directory directly
+  (`rm -rf ~/.hermes/skills/devops/<name>`) and note the supersession in
+  your report so the lineage is recorded somewhere durable.
+
+List anything you removed in your report. Do not touch skills outside this
+list.
 
 ## Step 2 — Install via the tap
 
