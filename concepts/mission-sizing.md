@@ -105,25 +105,28 @@ Does it require 2+ distinct agent profiles?
 
 ## For the define-mission Skill
 
-When a user submits intent, the skill must:
+Sizing is **advisory, never enforced**. The operator decides what qualifies as a
+mission; the system informs the decision and respects it.
+
+When a user submits intent, the skill should:
 
 1. **Apply the 5-criterion test silently.**
-2. **If 3+ criteria pass:** Proceed to Flight Plan generation.
-3. **If <3 criteria pass:** Reject with specificity:
+2. **If 3+ criteria pass:** Proceed to Flight Plan generation without comment.
+3. **If <3 criteria pass:** Advise with specificity, then follow the operator's call:
    ```
-   This looks like a task, not a Mission. Here's why:
-   - Single objective (fails criterion 3)
-   - Method is obvious: rewrite README, review, merge (fails criterion 5)
-   - One agent can handle this (fails criterion 1)
+   Heads up: this looks task-sized. Here's why:
+   - Single objective (criterion 3)
+   - Method is obvious: rewrite README, review, merge (criterion 5)
+   - One agent can handle this (criterion 1)
 
-   RECOMMENDATION: Use /goal directly, or create a single Kanban task.
-   If you believe this IS a mission, explain why the method is ambiguous
-   or why coordination is required.
+   A direct /goal or a single Kanban card would be faster and cheaper.
+   Want that instead, or should I draft the Flight Plan anyway?
    ```
-4. **Never** let a task masquerade as a mission. The overhead is not free. Respect the operator's time.
+4. **If the operator says proceed, proceed.** No second warning, no friction.
+   The overhead is theirs to spend.
 
 ## Related
 
 - [[mission-execution-chain]] — The six handoffs (missions have all six; tasks have 1-2)
 - [[mission-command]] — Auftragstaktik (missions require commander's intent; tasks require instructions)
-- [[goal-primitive]] — /goal is for tasks. Mission Contracts are for missions.
+- [[goal-primitive]] — /goal is for tasks. Flight Plans are for missions.

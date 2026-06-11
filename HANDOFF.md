@@ -1,170 +1,141 @@
-# HANDOFF: Operator-First Mission System — Session 2026-06-10
+# HANDOFF: missions.md MVP — Session 2026-06-10 (supersedes prior handoff)
 
 ## SITREP
 
-The operator-first mission system is in active development. Three Hermes skills are written and live in `~/.hermes/skills/devops/`. The missions repo at `github.com/earth2travis/missions` contains the Flight Plan template, a demo mission, generated `/goal` files, and a system synthesis. The architecture is defined. What remains is wiring the skills to actual tools and running a real end-to-end pipeline.
+The architecture was simplified from four layers to two. The hidden Mission
+Contract layer is gone; Flight Plans now compile directly to Hermes Kanban
+cards. The skill trio was renamed and re-scoped. The repo was cleaned up to
+match. The `define-mission` skill is written and installed. `launch-mission`
+and `debrief-mission` are next.
+
+**Correction to the prior handoff:** it claimed three skills lived in
+`~/.hermes/skills/devops/`. They did not — that directory contained only the
+bundled kanban skills. The only prior versions were the archived pre-research
+drafts. Verify claims like this on disk before building on them.
 
 ---
 
 ## What We Are Building
 
-A **Mission orchestration system** that makes multi-agent, multi-session work as simple as writing a one-page Flight Plan. The complexity (six handoffs, residual control, agency cost tracking, incomplete contract theory, Auftragstaktik, principal-agent economics) is buried in the system. The human writes intent. The system handles the architecture.
+A mission orchestration system: the human writes a one-page Flight Plan, a
+Hermes agent fleet executes it via Kanban automation, and an After-Action
+Review proves whether intent survived. NASA Mission Control feel: clean,
+decisive, low-friction.
 
-The experience should feel like **NASA Mission Control** or a **Special Operations mission packet**: clean, decisive, low-friction. Military terminology is fine; NASA uses it too.
+### The Architecture (Two Layers)
 
-### The Three-Layer Architecture
+```
+IDEA ──▶ define-mission ──▶ Flight Plan (one page — the only thing you write)
+                                │
+                       launch-mission
+                       ├─ pre-flight Go/No-Go checks (automatic)
+                       └─ kanban_create ×N ──▶ Hermes fleet executes
+                                │
+                       debrief-mission
+                       └─ task_runs ──▶ After-Action Review
+```
 
-| Layer | What the Human Sees | What the System Handles |
-|-------|-------------------|------------------------|
-| **Flight Plan** | One-page markdown: Commander's Intent, Constraints, Success Criteria | Nothing; human writes this |
-| **Mission Contract** | Nothing (hidden) | Auto-generated: six handoffs, cascade, residual control, Agency Cost Ledger |
-| **`/goal` Files** | Nothing (hidden) | Auto-generated: tool-agnostic execution leaves |
-| **Kanban Tasks** | Hermes dashboard | Auto-created with dependencies, budgets, metadata |
+| Layer | Owned by | What it is |
+|---|---|---|
+| Flight Plan | Human | Commander's Intent, Constraints, Success Criteria, Context |
+| Hermes Kanban | System | Cards with `parents=`, `goal_mode`, budgets, `kanban_block()` gates |
 
-### The Three Skills
-
-| Skill | What It Does | Trigger |
-|-------|-------------|---------|
-| `define-mission` | Turns raw intent into Flight Plan + auto-generated Contract | "I want to...", "We need to...", explicit `/define-mission` |
-| `plan-mission` | Reads Contract, creates `/goal` files, produces pre-launch telemetry | "Let's run this", "Deploy the mission", explicit `/plan-mission` |
-| `validate-mission` | Pre-flight checks: six intent checks + mechanical checks | Before execution, explicit `/validate-mission` |
-
-### The Flight Plan Template
-
-The only human-facing artifact. Lives at `_packet.md` in the repo. Contains:
-- Sizing Gate (informational self-assessment, **not enforced**)
-- Commander's Intent
-- Constraints (budget, pause conditions, human gates)
-- Success Criteria (outcome-oriented, verifiable)
-- Context (links, refs, notes)
-
-### Key Design Decisions (User-Approved)
-
-1. **Operator-first, not architecture-first.** The human writes intent; the system generates structure.
-2. **No enforcement gates.** If a user wants to run a task through the full mission pipeline, let them. The sizing guide is informational, not a barrier.
-3. **NASA-flavored with military terminology.** Mission Control, Flight Plan, Pre-Launch Telemetry, Go/No-Go.
-4. **No separate app.** Leverage Hermes as the dashboard. `/goal` and Kanban are the runtime.
-5. **Minimal human interaction.** Auto-generate everything possible. Ask for confirmation only when ambiguous or high-stakes.
-6. **After-Action Review is a Markdown report.** Auto-populated from `task_runs`.
-7. **Skills are named `define-mission`, `plan-mission`, `validate-mission`.** User finds these intuitive.
+There is no hidden Mission Contract and no separate `goals/` directory. Goal
+text lives in Kanban card bodies, where the `goal_mode` judge reads it.
 
 ---
 
-## What We Built This Session
+## Decisions Made (2026-06-10, user-approved)
 
-1. **Three Operator Skills**
-   - `~/.hermes/skills/devops/define-mission/SKILL.md` — Intent → Flight Plan + Contract
-   - `~/.hermes/skills/devops/plan-mission/SKILL.md` — Contract → `/goal` files + Kanban tasks
-   - `~/.hermes/skills/devops/validate-mission/SKILL.md` — Pre-flight Go/No-Go checks
-
-2. **Flight Plan Template**
-   - `missions/_packet.md` — The one-page human-facing artifact
-   - Includes informational sizing gate (not enforced)
-
-3. **Demo Mission (End-to-End)**
-   - `missions/landing-page-readme.md` — Flight Plan
-   - `missions/landing-page-readme.contract.md` — Auto-generated Contract
-   - `goals/landing-page-readme-builder.md` — Builder `/goal`
-   - `goals/landing-page-readme-reviewer.md` — Reviewer `/goal`
-   - `goals/landing-page-readme-merge.md` — Orchestrator `/goal`
-
-4. **Mission Sizing Guide**
-   - `concepts/mission-sizing.md` — Educational reference for what makes a mission vs. a task
-   - **Not enforced by skills.** Informational only.
-
-5. **System Synthesis**
-   - `SYNTHESIS.md` — Overview of the system for quick reference
-
----
-
-## Decisions Made
-
-| Decision | Rationale |
+| Decision | Supersedes |
 |---|---|
-| Three skills: define, plan, validate | User finds these intuitive. Maps to natural workflow. |
-| No enforcement gates | User decides what qualifies as a mission. System helps, does not block. |
-| Flight Plan is the only human-facing file | Operator-first: one page of intent, not a 6-handoff contract. |
-| Contract is auto-generated and hidden | The system needs the structure; the human does not. |
-| `/goal` files auto-generated | Tool-agnostic execution leaves. No manual authoring. |
-| Informational sizing gate | Nudges user toward `/goal` for simple tasks, but never blocks. |
-| Sizing guide lives in `concepts/` | Reference material, not runtime policy. |
-| NASA flavor + military terminology | User preference. Clean, decisive, familiar. |
-| Hermes as dashboard | No separate app. Leverage existing tools. |
+| No hidden Mission Contract — Flight Plan compiles directly to Kanban cards | Four-layer architecture in prior handoff |
+| Trio is `define-mission` / `launch-mission` / `debrief-mission` | `define/plan/validate` naming |
+| Validation folds into `launch-mission` as automatic pre-flight Go/No-Go checks | Standalone `validate-mission` skill |
+| After-Action Review is the third skill (`debrief-mission`), generated from `task_runs` | "AAR as later subcommand" open question |
+| First real mission: build the missions.md public site (genuinely mission-sized) | README demo as first run |
+| Minimal fleet (builder + reviewer + default-as-orchestrator) set up as part of MVP | — |
+| Skills live in repo `skills/` (source of truth), installed to `~/.hermes/skills/devops/` | — |
+| Prove on personal OS first; target open-source + Hermes communities second | — |
+| Sizing is advisory, never enforced (unchanged, now consistent across all docs) | Contradictory "reject" language in `concepts/mission-sizing.md` |
+
+Standing preferences (unchanged): operator-first; no enforcement gates; NASA
+flavor with military terminology welcome; no separate app — Hermes is the
+dashboard; minimal human interaction; "Relax" — do not over-engineer.
 
 ---
 
-## Where We Left Off
+## What We Did This Session
 
-The architecture is defined. The skills are written. The demo mission exists. What remains is **execution and wiring**:
+1. **Repo cleanup**
+   - Rewrote `README.md` around the operator-first story and two-layer architecture
+   - Archived contract-era artifacts to `archive/contract-era/` with an explanatory README: `_template.md`, `evolution-plan.md`, the demo contract, the demo `/goal` files, and the demo Flight Plan (its goal — an accessible README — was fulfilled by the rewrite)
+   - Removed the now-empty `goals/` directory
+   - Fixed `concepts/mission-sizing.md`: sizing advice is advisory, never a rejection
+   - Rewrote `concepts/structural-limits.md` for the direct-to-Kanban architecture
+   - Refreshed `_packet.md` (Flight Plan template): sizing check reworded as informational, status lifecycle documented
+2. **`define-mission` skill** — written at `skills/define-mission/SKILL.md`
+   (source of truth) and installed to `~/.hermes/skills/devops/define-mission/`
 
-### Next Steps (Priority Order)
+---
 
-1. **Wire `plan-mission` to actual Kanban tools**
-   - Replace descriptive "would create" with actual `kanban_create()` calls
-   - Test dependency linking via `kanban_link()`
-   - Verify task metadata propagation (mission_id, handoff_number, budget)
+## Hermes Reality Check (verified on this machine)
 
-2. **Implement After-Action Review generator**
-   - Read `task_runs` from `kanban.db`
-   - Generate Markdown AAR: runtime, tokens, turns, residual loss, lessons
-   - Wire to a new `aar-mission` command or skill
+- `hermes profile list` shows a single profile: `default`. Gateway stopped.
+- `~/.hermes/skills/devops/` bundles `kanban-orchestrator`, `kanban-worker`,
+  `webhook-subscriptions` — read these before writing `launch-mission`; they
+  document the real tool contracts.
+- Key primitives: `kanban_create(parents=[...], goal_mode=True, goal_max_turns=N)`,
+  `kanban_block()`, `kanban_complete(summary, metadata)`, `task_runs` in SQLite,
+  `hermes kanban reclaim/reassign`.
+- The dispatcher **silently drops** cards assigned to unknown profiles. Always
+  discover profiles (`hermes profile list`) before assigning. Never invent names.
 
-3. **Run a real end-to-end pipeline**
-   - Pick a real codebase (not a demo)
-   - Execute builder → reviewer → orchestrator via Kanban
-   - Populate the Agency Cost Ledger
-   - Generate the first real AAR
+---
 
-4. **Build template library**
-   - `templates/mission-security-audit/`
-   - `templates/mission-refactor-migration/`
-   - `templates/mission-research-sprint/`
-   - Each contains a Flight Plan with pre-filled constraints and criteria
+## Next Steps (Priority Order)
 
-5. **Refine the Flight Plan → Contract generation**
-   - Currently manual/skilled generation. Consider automating via script or model call.
-   - Ensure backbrief gates are correctly set based on mission complexity
-
-6. **Connect to Substrate knowledge graph**
-   - Flight Plans should be able to reference `[[wikilinks]]` to Substrate insights
-   - Ensure `WIKI_PATH` resolution works for context injection
-
-7. **Open questions to resolve**
-   - Should AAR be a skill (`aar-mission`) or a subcommand?
-   - Should templates be repo directories or a separate `templates/` repo?
-   - How to handle mission abort/cleanup (Kanban tasks in running state)?
+1. **Write `launch-mission`** — reads a Flight Plan, runs pre-flight Go/No-Go
+   checks (intent present and outcome-oriented? criteria verifiable? budgets
+   set? gates declared? assignees exist?), presents the card graph for
+   approval, then issues real `kanban_create` calls with `mission_id` metadata,
+   `parents=` for true dependencies, `goal_mode=True` with acceptance criteria
+   in card bodies, and budgets from the Flight Plan.
+2. **Write `debrief-mission`** — reads `task_runs` filtered by `mission_id`,
+   generates a Markdown After-Action Review: runtime, tokens, turns, blocks,
+   verification outcomes, residual loss estimate, lessons.
+3. **Configure the minimal fleet** — 2–3 profiles (builder, reviewer; `default`
+   as orchestrator), gateway running. User said to check in before touching
+   profiles.
+4. **First real mission: the missions.md public site** — write its Flight Plan
+   with `define-mission`, launch it, debrief it. The AAR is the proof of value
+   and the launch story for the Hermes community.
 
 ---
 
 ## Files to Read on Resume
 
-1. `README.md` — Original architecture philosophy. Still valid.
-2. `_packet.md` — The Flight Plan template. What the human writes.
-3. `SYNTHESIS.md` — System overview written this session.
-4. `concepts/mission-sizing.md` — Reference material on mission vs. task.
-5. `missions/landing-page-readme.md` — Example Flight Plan (note: this is a task-sized demo; real missions should be bigger).
-6. `missions/landing-page-readme.contract.md` — Example auto-generated Contract.
-7. `~/.hermes/skills/devops/define-mission/SKILL.md` — The skill the next agent will use.
-8. `~/.hermes/skills/devops/plan-mission/SKILL.md` — The skill that needs Kanban wiring.
-9. `~/.hermes/skills/devops/validate-mission/SKILL.md` — Pre-flight linter.
+1. `README.md` — the story and architecture, current
+2. `_packet.md` — the Flight Plan template
+3. `skills/define-mission/SKILL.md` — the first skill
+4. `concepts/mission-sizing.md` — advisory sizing rules the skills follow
+5. `~/.hermes/skills/devops/kanban-orchestrator/SKILL.md` — real Kanban tool contracts
+6. `archive/contract-era/README.md` — why the contract layer was retired
 
 ---
 
 ## Context to Carry Forward
 
-- The user is **Ξ2T (Travis)**. He values operator-first thinking, minimal friction, and clean abstractions.
-- He explicitly rejected enforcement gates. The system suggests; it does not block.
-- He wants NASA-flavored language but military terminology is fine.
-- His 2026 word is **"Relax."** Do not over-engineer. Ship working things.
-- The `.md` TLD is significant. `missions.md` is the brand.
-- Substrate (the Brain) is separate from operational artifacts (missions repo).
-- Hermes Kanban is the runtime. `/goal` is the execution primitive.
-- The user maintains strict separation: Substrate = knowledge, missions repo = operations.
-
----
+- The user is **Ξ2T (Travis)**, earth2travis. Operator-first, minimal friction,
+  clean abstractions. 2026 word: **"Relax."** Ship working things.
+- `missions.md` is the brand. Substrate = knowledge; missions repo = operations.
+  Strict separation.
+- The system suggests; it never blocks. The operator decides.
+- The ecosystem goal: skills contributable upstream to Hermes; missions.md as
+  the methodology home.
 
 ## The Commitment
 
-Build the simplest thing that works. Wire the skills to the tools. Run a real pipeline. Generate a real AAR. Then iterate.
-
-The goal is not a perfect system on paper. The goal is a system that makes multi-agent orchestration feel as simple as writing a one-page Flight Plan.
+Build the simplest thing that works. Two layers, three skills, one real
+mission. The goal is a system that makes multi-agent orchestration feel as
+simple as writing a one-page Flight Plan — and proves it with a debrief.

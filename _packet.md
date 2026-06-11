@@ -1,6 +1,6 @@
 ---
 title: "Flight Plan"
-status: draft
+status: draft # draft → ready → launched → complete
 priority: normal
 budget:
   tokens: 50000
@@ -9,13 +9,15 @@ budget:
 
 # Flight Plan: [MISSION NAME]
 
-## Sizing Gate (Self-Assessment)
+## Sizing Check (Informational)
 Is this a Mission or a Task?
 
-A **Mission** is a bounded campaign requiring coordination across agents, sessions, or domains.
+A **Mission** is a bounded campaign: multiple agents, multiple sessions, real
+coordination, judgment calls about method.
 A **Task** is work one agent can complete in one session with one `/goal`.
 
-If this is a task, consider using `/goal` directly for speed. If this is a mission, proceed.
+If this is a task, a direct `/goal` or a single Kanban card is faster and
+cheaper. Your call either way — this check never blocks a launch.
 
 ## Commander's Intent
 What must be true, and why does it matter?

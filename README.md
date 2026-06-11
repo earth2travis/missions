@@ -1,94 +1,88 @@
-# missions/
+# missions.md
 
-> This directory holds Mission Contracts: orchestration manifests that define multi-agent work across heterogeneous tools.
->
-> For the philosophy behind this system, see the Substrate knowledge base: [earth2travis/substrate](https://github.com/earth2travis/substrate)
+**Write one page of intent. A fleet of agents executes it. A debrief shows you whether your intent survived.**
 
-## What This Is
+## Why
 
-A Mission Contract is a file that describes what must be done, why it matters, and how intent travels from human intention to machine execution without being lost along the way.
+Every time you hand work to someone — a contractor, a teammate, an agent — some of what you meant gets lost. As agents take on more of the execution, that loss compounds silently across every handoff. Most agent tooling optimizes for *doing more*. missions.md optimizes for something different: **making sure what gets done is what you meant.**
 
-It is not a task list. It is not a project plan in the traditional sense. It is an incomplete contract: specific enough to evaluate, open enough to adapt. The human defines the outcome. The agents choose the method. The contract ensures the outcome and the method remain connected.
+The idea is old. Militaries call it mission command (Auftragstaktik): the commander states the intent and the constraints, and trusts the unit to choose the method. NASA runs the same pattern as Mission Control: a Flight Plan, Go/No-Go checks, telemetry, and a debrief. missions.md applies that pattern to agent fleets.
 
-## What This Is Not
+You command. The system coordinates. The agents execute.
 
-- **Not a replacement for /goal.** The `/goal` primitive is the execution leaf: session-scoped, autonomous, "work until done." The Mission Contract is the orchestration container: cross-session, intent-preserving, spanning multiple `/goal` invocations. They are complementary, not conflated.
-- **Not a walled garden.** Any tool that implements `/goal` can participate in a Mission pipeline without adopting our format. The Mission Contract references `/goal` texts; it does not redefine them.
-- **Not a guarantee.** Perfect delegation is theoretically impossible. The contract makes intent loss bounded and observable, not eliminated.
-
-## The Architecture
+## How It Works
 
 ```
-missions/
-  _template.md          # Start here. Copy, rename, remove guidance blockquotes.
-  [mission-name].md     # Your Mission Contract: the orchestration manifest
-
-goals/
-  [goal-name].md        # /goal text files: tool-agnostic execution primitives
+IDEA ──▶ define-mission ──▶ Flight Plan (one page — the only thing you write)
+                                │
+                       launch-mission
+                       ├─ pre-flight Go/No-Go checks (automatic)
+                       └─ kanban_create ×N ──▶ Hermes fleet executes
+                                │
+                       debrief-mission
+                       └─ task_runs ──▶ After-Action Review (the proof)
 ```
 
-The Mission Contract lives in `missions/`. The `/goal` texts live in `goals/`. The orchestrator reads the Contract, maps each `goal_ref` to the appropriate agent and tool, and dispenses `/goal` texts as leaf-node instructions.
+Two layers. No hidden machinery in between:
 
-No agent receives the Mission Contract. Agents receive `/goal` texts in the standard syntax they already understand. The Contract is the orchestrator's map. The `/goal` is the agent's compass.
+| Layer | Owned by | What it is |
+|---|---|---|
+| **Flight Plan** | You | One page: Commander's Intent, Constraints, Success Criteria, Context |
+| **Hermes Kanban** | The system | Cards with dependencies, budgets, verification, and human gates |
 
-## The Six Handoffs
+The orchestration theory (intent cascades, verification gates, bounded delegation) lives in how the skills *design the cards*, not in extra artifacts you maintain.
 
-Every Mission Contract implements the six handoffs from the mission execution chain. Each handoff is a delegation point. Each delegation point is an agency relationship. Each agency relationship is a place where intent can be lost.
+## The Three Skills
 
-| Handoff | From → To | What the Contract Enforces |
-|---------|-----------|---------------------------|
-| 1 | Why → BHAG | Intent restatement: the Mission must serve the Why in fresh words |
-| 2 | BHAG → Mission | Paragraph 2 Test: achieving the Mission must serve the BHAG |
-| 3 | Mission → Objectives | Outcome orientation: every objective measures result, not activity |
-| 4 | Objectives → Projects | Backbrief gate: plan presented and approved before /goal assignment |
-| 5 | Projects → Tasks | Intent metadata: every task links to the objective it serves |
-| 6 | Tasks → Execution | Verification stack: signals collected, human review gate, stop-the-line authority |
+| Skill | What it does | You say |
+|---|---|---|
+| `define-mission` | Turns raw intent into a Flight Plan | "I want to…", "We need to…" |
+| `launch-mission` | Runs pre-flight checks, then compiles the Flight Plan into Kanban cards | "Launch it", "Run this mission" |
+| `debrief-mission` | Reads `task_runs` and generates the After-Action Review | "Debrief", "How did it go?" |
 
-The template makes each handoff explicit. You cannot skip one accidentally. It is a required section.
+Skills live in [`skills/`](skills/) (source of truth) and install into `~/.hermes/skills/` for the Hermes agent.
 
-## Residual Control
+## Your First Mission
 
-Per Grossman and Hart, residual control rights determine who has the incentive to enforce the contract. The Mission Contract specifies who holds pause, approve, override, and completion rights at each handoff.
+1. Tell your Hermes agent what you want: *"I want every API route to return structured error codes, because silent auth failures are security incidents waiting to happen."*
+2. `define-mission` drafts a Flight Plan in `missions/` and asks only what it cannot infer. You approve it.
+3. Say *"launch it."* `launch-mission` runs the Go/No-Go checks, then creates Kanban cards assigned to your configured profiles. Dependencies gate the sequence; `goal_mode` judges each card against its acceptance criteria; human gates block where you said they should.
+4. Watch the Hermes dashboard, or walk away. The board survives restarts.
+5. Say *"debrief."* You get an After-Action Review: what ran, what it cost, what passed verification, and where intent drifted.
 
-This prevents two failure modes:
-- **Human holds everything:** Initiative dies. The agent becomes a script.
-- **Agent holds everything:** Accountability dies. The principal becomes a spectator.
+## What the System Leans On
 
-The optimal allocation is contextual and configurable per Mission. The template provides the structure. You provide the decision.
+missions.md builds no orchestration tech. It is a human-facing layer over primitives Hermes Kanban already ships:
 
-## Agency Cost Ledger
+| Mission need | Hermes primitive |
+|---|---|
+| Sequencing and parallelism | `kanban_create(parents=[...])` with dispatcher auto-promotion |
+| Verification against acceptance criteria | `goal_mode=True` (judge re-checks each turn) |
+| Human gates | `kanban_block()` / `/unblock` |
+| Budgets | `goal_max_turns`, token/time limits |
+| The audit trail and AAR data | `task_runs` in SQLite |
+| Recovery from stuck workers | `reclaim` / `reassign` |
 
-Every Mission Contract includes a ledger table that is populated after execution. It tracks:
+Any tool that speaks `/goal` can join a pipeline. There is no lock-in to defend, because there is no proprietary runtime to lock into.
 
-- Tokens consumed per handoff
-- Turns used per agent
-- Latency per delegation
-- Verification signal coverage
-- Estimated residual loss (false done detection, plan drift, rework)
+## Repo Layout
 
-This makes Holmstrom's agency costs observable. You cannot eliminate them. You can measure them and optimize their sum.
+```
+missions/      Flight Plans — one file per mission
+skills/        define-mission, launch-mission, debrief-mission (Hermes SKILL.md format)
+concepts/      Sizing guidance and architecture notes
+archive/       Earlier iterations, preserved with context
+_packet.md     The Flight Plan template
+```
 
-## How to Use This
+## Sizing: Mission or Task?
 
-1. **Copy the template.** `cp missions/_template.md missions/[your-mission-name].md`
-2. **Remove guidance blockquotes.** Every `> ` line is instructions for you. Delete them.
-3. **Fill the Mission Statement.** Pass the Bungay "Why" test. What must be true, and why does it matter?
-4. **Define the cascade.** Walk through the six handoffs. Be explicit.
-5. **Write the /goal files.** Create `goals/[goal-name].md` files for each execution leaf. Use standard `/goal` syntax.
-6. **Assign residual control.** Who holds pause, approve, and override at each handoff?
-7. **Execute.** The orchestrator reads the Contract, runs the backbrief protocol, dispenses `/goal` texts, and populates the ledger.
-8. **Review.** After execution, the ledger tells you what the delegation cost. The contract tells you whether the intent survived.
+A Mission is a bounded campaign: multiple agents, multiple sessions, real coordination, judgment calls about method. A Task is something one agent finishes in one session. If it's a task, a direct `/goal` or a single Kanban card is faster — and `define-mission` will tell you so. It will never block you. The operator decides; the system advises. See [`concepts/mission-sizing.md`](concepts/mission-sizing.md).
 
-## Related Knowledge
+## The Deeper Theory
 
-- Mission Execution Chain (Substrate)
-- Principal-Agent Theory (Substrate)
-- The /goal Primitive (Substrate)
-- Kanban Doctrine (Substrate)
-- Subagent Architecture (Substrate)
+The design is grounded in mission command doctrine, incomplete contract theory (Grossman-Hart), and principal-agent economics (Holmstrom). Delegation always costs something; the goal is not to eliminate that cost but to make it bounded, observable, and improvable. The full treatment lives in the [Substrate knowledge base](https://github.com/earth2travis/substrate) and in [`concepts/`](concepts/).
 
-## The Commitment
+## Status
 
-A Mission Contract is a promise: from human to agent, from intent to execution, from what matters to what gets done. It is not a guarantee that the promise will be kept perfectly. It is a structure that makes broken promises visible, measurable, and improvable.
-
-The goal is not perfect delegation. The goal is bounded, observable, and composable delegation across tools that share nothing except the will to build something that matters.
+MVP in active development. The Flight Plan template and `define-mission` skill exist; `launch-mission` and `debrief-mission` are next, followed by the first real mission: building the public missions.md site with the system itself.
