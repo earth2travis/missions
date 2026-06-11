@@ -166,6 +166,9 @@ CONSTRAINTS
 HANDOFF
 - What to leave in kanban_complete(summary, metadata) for downstream cards —
   name the fields so parsers downstream don't re-read prose.
+- Always include usage self-report fields: {"usage": {"turns": N,
+  "tokens_est": N}}. The board does not record these; your self-report is
+  what makes the mission debrief's cost ledger possible.
 
 Mission: <slug> | Flight Plan: missions/<slug>.md | Criteria owned: 1, 3
 ```

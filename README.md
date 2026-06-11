@@ -85,4 +85,4 @@ The design is grounded in mission command doctrine, incomplete contract theory (
 
 ## Status
 
-MVP in active development. The Flight Plan template, `define-mission`, and `launch-mission` exist; `debrief-mission` is next, followed by fleet setup and the first real mission: building the public missions.md site with the system itself.
+MVP in active development. All three skills exist and are installed. Next: fleet setup (2–3 Hermes profiles), then the first real mission — building the public missions.md site with the system itself.
