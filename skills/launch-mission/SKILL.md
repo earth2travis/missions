@@ -29,10 +29,30 @@ compiler: Flight Plan in, well-designed cards out.
   Commander's Intent or Success Criteria (that is the operator's page —
   if a check fails, report it and let them fix or override).
 
-## Step 0 — Discover the fleet
+## Step 0 — Discover and read the fleet
 
-Before anything else, find out what profiles exist. Run `hermes profile list`
-through your terminal tool; if you can't, ask the operator. Cache the answer.
+Before anything else, build a **roster with capabilities**, not just a name
+list. Three signals, in order of strength:
+
+1. **Names and models:** `hermes profile list` via your terminal tool (ask
+   the operator if you can't run it).
+2. **Descriptions:** each profile's `profile.yaml`
+   (`~/.hermes/profiles/<name>/profile.yaml`; the `default` profile lives at
+   the root) may carry a `description` of what it is good at. This is the
+   same signal Hermes' native `kanban decompose` routes by — match against
+   it and you are speaking the platform's own routing convention.
+   - **If profiles are undescribed**, offer to fix it once for the whole
+     fleet: `hermes profile describe --all --auto` has the auxiliary LLM
+     generate each description from the profile's installed skills, model,
+     and name. One command, and every future mission routes better. The
+     operator can review/edit afterward (`description_auto: true` marks
+     them).
+3. **Track record:** the board knows what each assignee has actually
+   finished. When two profiles look equally fit on paper, check recent
+   completed cards per assignee (`kanban_list` / run summaries) —
+   demonstrated competence beats described competence.
+
+Cache the roster for the conversation.
 
 **The dispatcher silently drops cards assigned to unknown profiles** — no
 error, no fallback, the card sits in `ready` forever. Never invent an assignee
@@ -86,6 +106,10 @@ Rules of decomposition (the kanban-orchestrator playbook applies in full):
 
 - One card per workstream lane. Independent lanes stay unlinked so the
   dispatcher fans them out in parallel.
+- Assign each lane by matching it against the roster's **descriptions and
+  track record**, and show your reasoning in the graph — the operator should
+  see *why* each profile got its lane, so a bad match dies in the backbrief,
+  not on the board.
 - Link only **true data dependencies** via `parents=[...]`. "Also" and
   "finally" in the Flight Plan do not imply sequence.
 - Map each card's acceptance criteria back to specific Success Criteria from
@@ -102,8 +126,10 @@ Present the graph compactly:
 ```
 CARD GRAPH: landing-site (4 cards)
   T1 design: site structure + copy outline        → builder    (no parents)
+     why builder: "front-end implementation and static sites" + 6 done cards in this domain
   T2 build: static site from T1 structure         → builder    (parents: T1)
   T3 review: against success criteria 1-3         → reviewer   (parents: T2)
+     why reviewer: description names QA/code review; only profile with review history
   T4 gate: human approval before deploy           → builder    (parents: T3, blocks for review)
 Go to create? [adjust / go]
 ```
