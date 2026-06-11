@@ -1,7 +1,7 @@
 ---
 name: define-mission
 description: Turn raw operator intent into a one-page Flight Plan — the human-facing artifact of the missions.md system. Captures Commander's Intent, Constraints, and Success Criteria; advises on mission-vs-task sizing without ever blocking. Does NOT create Kanban cards (that is launch-mission's job).
-version: 1.1.0
+version: 1.2.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -113,8 +113,16 @@ valid on this machine — verify they exist before writing them down.
 
 1. Write to `missions/<slug>.md` (kebab-case slug from the mission name),
    frontmatter `status: draft`, with the budget block filled in.
-2. Show the operator the full page. Ask for approval or edits — this is the
-   one human review the system requires.
+2. Show the operator the full page, ending with an explicit decision block
+   — the ask must be impossible to miss:
+
+   ```
+   DECISION REQUIRED
+   1. Flight Plan approval — reply "approve" to set status: ready, or
+      give edits (I apply them and re-present).
+   ```
+
+   This is the one human review the system requires.
 3. On approval, set `status: ready` and tell them: **"Flight Plan is ready.
    Say 'launch' when you want it on the board."**
 

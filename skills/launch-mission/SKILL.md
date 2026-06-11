@@ -1,7 +1,7 @@
 ---
 name: launch-mission
 description: Compile an approved Flight Plan into Hermes Kanban cards and launch the mission. Runs automatic pre-flight Go/No-Go checks, presents the card graph for operator approval, then issues real kanban_create calls with dependencies, budgets, goal_mode verification, and human gates. The deep-integration skill of the missions.md system.
-version: 1.2.0
+version: 1.3.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -28,6 +28,28 @@ compiler: Flight Plan in, well-designed cards out.
 - **Out of scope:** doing any of the mission's work yourself, editing
   Commander's Intent or Success Criteria (that is the operator's page —
   if a check fails, report it and let them fix or override).
+
+## Asking the operator: the decision block
+
+Every time you stop for operator input — the poll, the card graph, a NO-GO
+remedy — end the message with exactly one block in this shape, and put
+nothing the operator must act on outside it:
+
+```
+DECISION REQUIRED
+1. <decision> — reply "<word>" to <effect>, or <alternative>.
+2. <decision> — ...
+```
+
+- One numbered line per decision. Each names the **literal reply** that
+  proceeds and what it causes.
+- Distinct decisions stay distinct. **Never bundle a NO-GO remedy into the
+  launch word** — clear the NO-GO as its own decision, show the re-probe
+  result, then ask for launch separately.
+- Pure status reports end with `No action required.`
+
+(Field lesson: a pre-flight that said a NO-GO "resolves at your word" left
+the operator unsure what to say. The ask must be impossible to miss.)
 
 ## Step 0 — Discover and read the fleet
 
@@ -67,7 +89,7 @@ Run every check, then report a single Go/No-Go poll. Two severities:
 | Check | Why it's mechanical |
 |---|---|
 | At least one profile exists and every planned assignee is on the list | Unknown assignees are silently dropped |
-| Gateway/dispatcher is running (or operator confirms they'll start it) | Cards would sit unclaimed |
+| Dispatcher is running | Cards would sit unclaimed. Probe correctly: `kanban.dispatch_in_gateway` in `~/.hermes/config.yaml` true-or-absent **plus** the gateway service active means the dispatcher runs **embedded in the gateway** — confirm via the `kanban dispatcher: embedded in gateway` line in gateway.log. Do NOT grep for a standalone daemon process; an embedded dispatcher shows none, and that absence is not a NO-GO |
 | Flight Plan has at least one Success Criterion | `goal_mode` judges against acceptance criteria; no criteria = blind judge |
 
 **ADVISORY (intent quality — report specifically, operator may override with a word):**
@@ -91,11 +113,18 @@ PRE-FLIGHT: <mission name>
   intent ........ GO
   budget ........ ADVISORY — no turn limit set; proposing goal_max_turns=15 per card
   gates ......... GO (human gate on merge to main)
-POLL: GO with 1 advisory. Proceed? [adjust / go / abort]
+POLL: GO with 1 advisory.
+
+DECISION REQUIRED
+1. Budget advisory — reply "accept turns" to use goal_max_turns=15 per
+   card, or give your own numbers.
+2. Proceed — reply "go" to see the card graph, or "abort".
 ```
 
-NO-GO items must be resolved before launch. Advisories need one operator
-word. Don't re-litigate after they answer.
+If the poll had a NO-GO, it becomes decision #1 with its remedy ("reply
+'fix dispatcher' and I will …"), and the proceed question waits until you
+have shown the NO-GO cleared. Advisories need one operator word. Don't
+re-litigate after they answer.
 
 ## Step 2 — Sketch the card graph (the backbrief)
 
@@ -132,7 +161,10 @@ CARD GRAPH: landing-site (4 cards)
   T3 review: against success criteria 1-3         → reviewer   (parents: T2)
      why reviewer: description names QA/code review; only profile with review history
   T4 gate: human approval before deploy           → builder    (parents: T3, blocks for review)
-Go to create? [adjust / go]
+
+DECISION REQUIRED
+1. Card graph — reply "launch" to create these cards exactly as shown,
+   or name the change (card, assignee, parent, gate, workspace).
 ```
 
 ## Step 3 — Create the cards
@@ -282,3 +314,6 @@ This table is how `debrief-mission` later finds the mission's `task_runs`.
   to grep titles. Write it immediately after creation, while ids are in hand.
 - **Re-running checks after Go.** One poll, one answer. The operator's Go is
   the system's Go.
+- **Burying the ask.** If the operator has to re-read your message to find
+  what you need from them, the message failed. Every stop ends in a
+  DECISION REQUIRED block; everything else is briefing.

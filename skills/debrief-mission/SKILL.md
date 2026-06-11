@@ -1,7 +1,7 @@
 ---
 name: debrief-mission
 description: Generate the After-Action Review for a mission. Reads the Flight Plan's Launch Record, pulls the actual execution history from the Kanban board (task_runs, comments, events), grades every Success Criterion against evidence, and writes a Markdown AAR. Also answers mid-mission "how's it going?" with a status read. The proof-of-value skill of the missions.md system.
-version: 1.0.0
+version: 1.1.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -90,7 +90,14 @@ STATUS: landing-site — 2/4 cards complete
   T4 deploy gate ... TODO (gated on T3)
   ⚠ T2 is on its second attempt; consecutive_failures=1.
 Full debrief available when the board goes quiet.
+No action required.
 ```
+
+End every status read with `No action required.` — unless a stuck card
+genuinely needs an operator call, in which case end with a `DECISION
+REQUIRED` block naming the exact reply for each option (e.g., `reply
+"reclaim T2"` / `reply "reassign T2 to <profile>"` / `reply "wait"`).
+Never leave the operator wondering whether you are waiting on them.
 
 ## Step 4 — Write the After-Action Review
 
@@ -146,9 +153,17 @@ Each lesson names the artifact it would change. No platitudes.
 1. Set the Flight Plan frontmatter `status: complete`.
 2. Give the operator the SITREP and the scoreboard inline — the file is the
    record; the conversation is the debrief.
-3. Ask the Paragraph 2 question directly: **"Criteria aside — did you get
-   what you meant?"** If no, that gap is the most important finding; append
-   it to Residual Loss in their words.
+3. Ask the Paragraph 2 question directly, as its own decision block —
+   one question, nothing bundled with it:
+
+   ```
+   DECISION REQUIRED
+   1. Criteria aside — did you get what you meant? Reply "yes" or tell
+      me what is missing (it becomes the top finding in Residual Loss).
+   ```
+
+   If no, that gap is the most important finding; append it to Residual
+   Loss in their words.
 4. Offer, don't push: lessons worth promoting to Substrate or a follow-up
    Flight Plan for unfinished intent.
 
