@@ -67,6 +67,8 @@ cp -R missions/skills/* ~/.hermes/skills/devops/
 
 One-time prep worth doing: `hermes profile describe --all --auto` generates a capability description for every profile from its installed skills — `launch-mission` routes mission lanes by matching against these.
 
+Prefer to delegate the whole install? Paste [`docs/install-prompt.md`](docs/install-prompt.md) to your Hermes agent — it covers install, fleet prep, verification, and reporting.
+
 ## Your First Mission
 
 1. Tell your Hermes agent what you want: *"I want every API route to return structured error codes, because silent auth failures are security incidents waiting to happen."*
