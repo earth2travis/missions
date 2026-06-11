@@ -76,6 +76,12 @@ dashboard; minimal human interaction; "Relax" — do not over-engineer.
    - Refreshed `_packet.md` (Flight Plan template): sizing check reworded as informational, status lifecycle documented
 2. **`define-mission` skill** — written at `skills/define-mission/SKILL.md`
    (source of truth) and installed to `~/.hermes/skills/devops/define-mission/`
+3. **`launch-mission` skill** — written at `skills/launch-mission/SKILL.md`,
+   installed alongside. Pre-flight Go/No-Go poll (mechanical NO-GOs vs.
+   advisories), backbrief card graph, parents-first creation with captured
+   ids, four-part card body anatomy, gates via `review-required:` blocks,
+   Launch Record appended to the Flight Plan (the card-id table
+   `debrief-mission` will read)
 
 ---
 
@@ -95,19 +101,17 @@ dashboard; minimal human interaction; "Relax" — do not over-engineer.
 
 ## Next Steps (Priority Order)
 
-1. **Write `launch-mission`** — reads a Flight Plan, runs pre-flight Go/No-Go
-   checks (intent present and outcome-oriented? criteria verifiable? budgets
-   set? gates declared? assignees exist?), presents the card graph for
-   approval, then issues real `kanban_create` calls with `mission_id` metadata,
-   `parents=` for true dependencies, `goal_mode=True` with acceptance criteria
-   in card bodies, and budgets from the Flight Plan.
-2. **Write `debrief-mission`** — reads `task_runs` filtered by `mission_id`,
-   generates a Markdown After-Action Review: runtime, tokens, turns, blocks,
-   verification outcomes, residual loss estimate, lessons.
-3. **Configure the minimal fleet** — 2–3 profiles (builder, reviewer; `default`
+1. **Write `debrief-mission`** — reads the Flight Plan's Launch Record for
+   card ids, pulls their `task_runs` rows, generates a Markdown After-Action
+   Review: runtime, tokens, turns, blocks, verification outcomes, residual
+   loss estimate, lessons. Note: `kanban_create` has no metadata param, so
+   mission identity lives in the `[m:<slug>]` title prefix, the card body
+   footer, and the Launch Record table — debrief should rely on the Launch
+   Record first.
+2. **Configure the minimal fleet** — 2–3 profiles (builder, reviewer; `default`
    as orchestrator), gateway running. User said to check in before touching
    profiles.
-4. **First real mission: the missions.md public site** — write its Flight Plan
+3. **First real mission: the missions.md public site** — write its Flight Plan
    with `define-mission`, launch it, debrief it. The AAR is the proof of value
    and the launch story for the Hermes community.
 
