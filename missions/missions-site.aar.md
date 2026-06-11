@@ -9,7 +9,7 @@ verdict: intent-survived
 
 ## SITREP
 
-The operator meant for missions.md to have a public face: a site where a stranger understands intent loss on the first screen and reaches working skills without leaving the instructions. That site now exists, live at https://missions-site.sivart-36d.workers.dev, all six criteria verified on the deployed artifact. It cost roughly 3h49m of board wall-clock across 16 runs on 10 cards, plus an unplanned second act: about 8 hours of operator-authorized direct fixes after the board went quiet, because the deploy that the board recorded as done was not actually serving.
+The operator meant for missions.md to have a public face: a site where a stranger understands intent loss on the first screen and reaches working skills without leaving the instructions. That site now exists, live at https://missions-site.sivart-36d.workers.dev, all six criteria verified on the deployed artifact. It cost roughly 3h49m of board wall-clock across 17 runs on 10 cards, plus an unplanned second act: about 8 hours of operator-authorized direct fixes after the board went quiet, because the deploy that the board recorded as done was not actually serving.
 
 ## Success Criteria Scoreboard
 
@@ -36,7 +36,7 @@ The operator meant for missions.md to have a public face: a site where a strange
 | t_3e071f9c repair hydration | combat_engineer | 1 | 19m | — | not recorded | done |
 | t_340d7b29 gate + deploy | combat_engineer | 5 | ~35m active | 8m + 5m + 7m + 23m across 4 blocks | 96 turns (final run, self-rep.) | done (prematurely, see Anomalies) |
 | t_3de4be1a repair SSR deploy | combat_engineer | 1 | 12m | — | ~18K tok, 14 turns | done (prematurely, see Anomalies) |
-| **Totals** | | **16 runs** | **board span 03:10 → 06:59 UTC (3h49m)** | **~2h08m cumulative** | **~278K tok self-reported, gaps unrecorded** | **10/10 done** |
+| **Totals** | | **17 runs** | **board span 03:10 → 06:59 UTC (3h49m)** | **~2h08m cumulative** | **~278K tok self-reported, gaps unrecorded** | **10/10 done** |
 
 Planned vs. actual: budget was 500K tokens / 48h. Self-reported tokens total ~278K but four runs recorded nothing, so the true figure is higher and not recoverable; treat the token budget as plausibly approached but not provably exceeded. Wall-clock came in well under 48h even counting the direct-fix tail (first card 03:10, final live verification ~14:34, about 11.5h elapsed).
 
@@ -61,7 +61,7 @@ Post-board direct-fix work (operator-authorized, hands: sivart) is not in the ru
 - **Two cards completed on claims the live system contradicted.** The deploy card's judge accepted wrangler's success output as proof of liveness after the security scanner blocked curl on the .dev TLD. The criterion said "returning HTTP 200"; the completion did not include one. The gate caught everything it was designed to catch; the verification step after the gate had no fallback when its tool was blocked. ~8 hours of operator-session debugging followed.
 - **Criterion 2's first verification failed**, costing one rework and one re-verify card. This is counted loss but cheap loss: 12 minutes of cards against an install path that was genuinely broken for strangers.
 - **Credential metadata was wrong twice** (GitHub PAT unusable from the VPS, Cloudflare item was a login not a token), costing 31m of gate latency. "In the vault" is not "usable from this host."
-- **Token telemetry has holes.** Four of sixteen runs reported nothing. The ledger's totals row is honest about this, but the budget line in the next Flight Plan cannot be reconciled against actuals.
+- **Token telemetry has holes.** Nine of seventeen runs reported no usage: six were blocked gate handoffs where none is expected, but three working runs (the timed-out scaffold attempt, the install-page rework, the hydration repair) recorded nothing. The ledger's totals row is honest about this, but the budget line in the next Flight Plan cannot be reconciled against actuals.
 - **Framework risk materialized as diagnosis cost, not failure.** vinext 0.1.1 consumed one timeout, two repair cards, and the entire direct-fix tail. The Flight Plan's pause clause ("repair or work around it within budget, pause rather than swap frameworks silently") held: nobody swapped frameworks, and the operator made every escalation call.
 
 ## Operator Verdict
