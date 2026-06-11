@@ -1,7 +1,7 @@
 ---
 name: launch-mission
 description: Compile an approved Flight Plan into Hermes Kanban cards and launch the mission. Runs automatic pre-flight Go/No-Go checks, presents the card graph for operator approval, then issues real kanban_create calls with dependencies, budgets, goal_mode verification, and human gates. The deep-integration skill of the missions.md system.
-version: 1.3.0
+version: 1.4.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -252,6 +252,19 @@ creating anything:
 The shared path must exist (or be a repo clone) before launch; verify it in
 pre-flight when the graph needs one. State the workspace in the card graph
 you present — the operator should see where the work product will live.
+
+**The scratch consistency rule:** scratch is legal only when the handoff
+*contains* the artifact — findings in the summary, data in metadata, prose
+in a comment. **If any HANDOFF field asks for a path (`*_path`, "where you
+wrote X"), the card cannot be scratch** — scratch workspaces are deleted
+when the task completes, so the path dangles the moment a downstream card
+reads it. Either give the card a persistent workspace (`dir`/`worktree`,
+usually the lane's shared path), or rewrite the handoff to carry the
+content itself. Check every card for this before the backbrief: a card
+whose handoff names a path while its workspace is scratch is a graph bug,
+not a style choice. (Field lesson: a content card "completed" into a
+scratch dir and its six pages of copy nearly evaporated before the build
+card could read them.)
 
 Two more per-card controls worth using when they fit:
 - `max_runtime_seconds` — wall-clock circuit breaker alongside `goal_max_turns`.
