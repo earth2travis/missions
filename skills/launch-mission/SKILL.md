@@ -1,7 +1,7 @@
 ---
 name: launch-mission
 description: Compile an approved Flight Plan into Hermes Kanban cards and launch the mission. Runs automatic pre-flight Go/No-Go checks, presents the card graph for operator approval, then issues real kanban_create calls with dependencies, budgets, goal_mode verification, and human gates. The deep-integration skill of the missions.md system.
-version: 1.4.1
+version: 1.5.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -102,6 +102,9 @@ Run every check, then report a single Go/No-Go poll. Two severities:
 | Frontmatter budget matches Constraints prose | The frontmatter `budget:` block is canonical (it is what you read); if the prose drifted, flag the mismatch and have the operator confirm which number stands |
 | Pause conditions and human gates declared | Especially for anything irreversible |
 | Plan status is `ready` | If `draft`, confirm the operator approved it |
+| Every verification is executable from a worker sandbox | Sandboxes filter networks (one blocked all `.dev` domains); externally-observed criteria need a named fallback observer |
+| Credentials are usable, not just present | One probe per credential the graph needs, from the fleet host: reachable *and* valid for the target API. "In the vault" is not "usable from this host" — two stale items cost 31 minutes of gate latency |
+| Visibility probed before anything goes public | Check the actual private/public state of any repo or target a card will push to; never assume it matches the plan |
 
 Report format — terse, NASA-poll style:
 
@@ -221,6 +224,11 @@ ACCEPTANCE CRITERIA
 - Explicit, checkable statements. Copy the relevant Flight Plan Success
   Criteria; sharpen them per card. "Every page renders without console
   errors" — not "site works."
+- Include the usage self-report as a criterion ("completion metadata
+  carries usage.turns and usage.tokens_est"), not just a HANDOFF note —
+  the goal judge enforces criteria; it does not read HANDOFF etiquette.
+  (Field lesson: HANDOFF-only instructions were skipped on a quarter of
+  runs, leaving holes in the mission's cost ledger.)
 
 CONSTRAINTS
 - Budget for this card, pause conditions from the Flight Plan, workspace
@@ -235,6 +243,28 @@ HANDOFF
 
 Mission: <slug> | Flight Plan: missions/<slug>.md | Criteria owned: 1, 3
 ```
+
+### Verification discipline (every card that verifies anything)
+
+Three rules, all paid for in the field:
+
+- **Can't verify ⇒ block.** If the verification step cannot run — tool
+  blocked by the worker sandbox, network filtered, credential dead — the
+  card blocks with the reason. It never completes on a substitute signal:
+  a toolchain's success output is evidence about the toolchain, not about
+  the artifact. Write this rule into the card body verbatim; "verify X"
+  alone did not hold. (Two cards completed "live" while the site served
+  404s; the sandbox had silently blocked their HTTP checks.)
+- **Verify from outside the toolchain.** Deploy and publish cards verify
+  the observed artifact — the HTTP response, the installed package — and
+  the card body names a fallback observer for when the sandbox cannot
+  see it: another host, the operator's browser, a status API.
+- **FAIL blocks; done means passed.** A verification card whose verdict is
+  FAIL blocks with its findings instead of completing. To the dependency
+  graph, done is indistinguishable from passed — a FAIL that completes
+  silently arms every downstream card. (A criterion's first verification
+  completed with "FAIL:" in its summary; only a hand-written operator
+  fence kept the deploy gate honest.)
 
 ### Workspaces: where the work product lives
 
@@ -327,6 +357,11 @@ This table is how `debrief-mission` later finds the mission's `task_runs`.
   to grep titles. Write it immediately after creation, while ids are in hand.
 - **Re-running checks after Go.** One poll, one answer. The operator's Go is
   the system's Go.
+- **Workarounds that change scope.** A worker that changes *what gets
+  shipped* to get around an error — a different config file, a flagless
+  command — must report the change before executing it. Card bodies for
+  deploy/publish lanes say so. (A flagless deploy worked around a config
+  conflict and silently shipped an asset bucket instead of a site.)
 - **Burying the ask.** If the operator has to re-read your message to find
   what you need from them, the message failed. Every stop ends in a
   DECISION REQUIRED block; everything else is briefing.

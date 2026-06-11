@@ -1,7 +1,7 @@
 ---
 name: debrief-mission
 description: Generate the After-Action Review for a mission. Reads the Flight Plan's Launch Record, pulls the actual execution history from the Kanban board (task_runs, comments, events), grades every Success Criterion against evidence, and writes a Markdown AAR. Also answers mid-mission "how's it going?" with a status read. The proof-of-value skill of the missions.md system.
-version: 1.1.0
+version: 1.2.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -76,6 +76,10 @@ The board does **not** record tokens or turns. Report cost from what exists:
 - **Self-reported usage:** `usage` fields in run `metadata`, if workers
   reported them (launch-mission instructs this). Label them self-reported.
 - **Tokens you don't have:** say "not recorded," never estimate silently.
+- **Totals reconcile:** recompute every totals cell from the table rows
+  before writing — a ledger that does not sum is a credibility leak. When
+  later evidence supersedes earlier evidence (a re-measurement, a second
+  verification), label the old value superseded; never delete it.
 
 ## Step 3 — Mid-mission? Give a status read instead
 
@@ -126,6 +130,12 @@ Verdicts: MET / PARTIAL / UNMET / UNVERIFIABLE — each with evidence cited
 from run summaries, comments, or artifacts. UNVERIFIABLE is a finding about
 the Flight Plan: the criterion wasn't written checkably.
 
+When a criterion claims a live artifact (a URL, a published package, an
+installable skill), observe the artifact once yourself — a single
+read-only request — instead of trusting the completion summary. Completed
+cards have claimed liveness the artifact contradicted; the AAR's verdict
+must rest on the artifact, not the claim.
+
 ## Cost Ledger
 | card | assignee | attempts | wall-clock | gate latency | usage (self-rep.) | outcome |
 |---|---|---|---|---|---|---|
@@ -134,7 +144,10 @@ Totals row. Planned vs. actual against the Flight Plan budget.
 
 ## Timeline & Anomalies
 What ran when; every retry, block, reclaim, timeout, and hallucination
-warning, each with its cause in one line.
+warning, each with its cause in one line. Include operator-authorized work
+that happened after the board went quiet — comment trails are its record;
+label its costs unrecorded if they lived outside run metadata. Board-quiet
+is not mission-done.
 
 ## Residual Loss
 Where intent leaked, concretely: rework cards spawned after review, criteria

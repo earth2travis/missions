@@ -1,7 +1,7 @@
 ---
 name: define-mission
 description: Turn raw operator intent into a one-page Flight Plan — the human-facing artifact of the missions.md system. Captures Commander's Intent, Constraints, and Success Criteria; advises on mission-vs-task sizing without ever blocking. Does NOT create Kanban cards (that is launch-mission's job).
-version: 1.2.0
+version: 1.3.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -103,6 +103,13 @@ Three to six, each one **outcome-oriented and verifiable**:
   it `(proxy for: low-friction)` so the operator can strike or replace it at
   approval — or leave it in Context as direction for the workers. Never
   leave an unverifiable adjective standing in Success Criteria.
+- **Externally-observed criteria name their fallback observer.** A criterion
+  verified outside the system — a live URL returning 200, a package
+  installable, an email delivered — names how it will be verified *and* who
+  observes it when the primary tool is blocked: a different host, the
+  operator's own browser, a status API. (Field lesson: a deploy card
+  completed on its toolchain's success output because the sandbox blocked
+  its HTTP check — the site was serving 404s for hours.)
 
 ### Context
 Links, file paths, Substrate `[[wikilinks]]`, prior decisions, operator notes.
