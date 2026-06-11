@@ -38,7 +38,7 @@ The operator meant for missions.md to have a public face: a site where a strange
 | t_3de4be1a repair SSR deploy | combat_engineer | 1 | 12m | — | ~18K tok, 14 turns | done (prematurely, see Anomalies) |
 | **Totals** | | **17 runs** | **board span 03:10 → 06:59 UTC (3h49m)** | **~2h08m cumulative** | **~278K tok self-reported, gaps unrecorded** | **10/10 done** |
 
-Planned vs. actual: budget was 500K tokens / 48h. Self-reported tokens total ~278K but four runs recorded nothing, so the true figure is higher and not recoverable; treat the token budget as plausibly approached but not provably exceeded. Wall-clock came in well under 48h even counting the direct-fix tail (first card 03:10, final live verification ~14:34, about 11.5h elapsed).
+Planned vs. actual: budget was 500K tokens / 48h. Self-reported tokens total ~278K but three working runs recorded nothing (nine of seventeen including blocked gate handoffs, where no usage is expected), so the true figure is higher and not recoverable; treat the token budget as plausibly approached but not provably exceeded. Wall-clock came in well under 48h even counting the direct-fix tail (first card 03:10, final live verification ~14:34, about 11.5h elapsed).
 
 Post-board direct-fix work (operator-authorized, hands: sivart) is not in the runs table by design; its record is the comment trail on t_340d7b29. Its token cost was borne by operator sessions and is not recorded.
 
