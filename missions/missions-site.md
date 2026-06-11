@@ -108,3 +108,4 @@ exists, the tool stays private and the ideas stay locked in a README.
 | t_340d7b29 | [m:missions-site] gate + deploy: repo public, Cloudflare live (criterion 4) | combat_engineer | t_95b5dcd0, t_862f3c59 | review-required ×2: repo public, deploy |
 | t_70409598 | [m:missions-site] rework: install page matches corrected install docs | combat_engineer | — | — |
 | t_3a5d08a9 | [m:missions-site] re-verify install path end-to-end (criterion 2, second attempt) | intelligence_officer | t_70409598 | — |
+| t_3e071f9c | [m:missions-site] repair: vinext hydration — site must render, not just build | combat_engineer | — | pause-on-fail: framework decision returns to operator |
