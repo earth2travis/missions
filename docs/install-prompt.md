@@ -63,7 +63,16 @@ hermes skills install earth2travis/missions/launch-mission --category devops --y
 hermes skills install earth2travis/missions/debrief-mission --category devops --yes
 ```
 
-**Fallback** — only if the Hub cannot fetch the repo (auth or rate limit):
+- **Expected:** every skill installs with a `safe` scan verdict.
+- **If an install reports `Blocked (community source + dangerous verdict …)`:**
+  do not fight the scanner — `--force` cannot override a dangerous verdict
+  from a community source, by design. This usually means the tap is serving
+  a skill version older than a scanner-compatibility fix. Remedy: use the
+  manual fallback below, and report which skill was blocked so the
+  maintainer can confirm a fixed version is published.
+
+**Fallback** — if the Hub cannot fetch the repo (auth or rate limit) or the
+security scan blocks an install:
 
 ```
 git clone https://github.com/earth2travis/missions.git /tmp/missions
@@ -103,12 +112,18 @@ because this is the step most sensitive to host config:
 Probe: `hermes profile describe default --auto`
 
 - **Expected:** a 1–2 sentence description is written and echoed.
-- **If `AuthenticationError`:** the describe command routes through Hermes'
+- **If `AuthenticationError` or `no auxiliary client configured`:** both
+  have the same root cause — the describe command routes through Hermes'
   auxiliary LLM client, and `auxiliary.profile_describer` defaults to
-  `provider: auto`, which can resolve to nothing. Remedy: in
+  `provider: auto`, which can resolve to nothing on a clean host. Remedy: in
   `~/.hermes/config.yaml`, set `auxiliary.profile_describer.provider`,
   `model`, `base_url`, and `api_key` explicitly to match your main provider,
   then re-run the probe.
+- **If you cannot configure the auxiliary client** (no spare key, restricted
+  host): this step is optional, not a blocker. Write descriptions by hand —
+  `hermes profile describe <name> --text "<one sentence on what this profile
+  is good at>"` — or skip it and say so in your report; launch-mission falls
+  back to routing by profile names and track record.
 
 Once the probe passes, run the full fleet:
 

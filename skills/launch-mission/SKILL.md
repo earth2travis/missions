@@ -1,7 +1,7 @@
 ---
 name: launch-mission
 description: Compile an approved Flight Plan into Hermes Kanban cards and launch the mission. Runs automatic pre-flight Go/No-Go checks, presents the card graph for operator approval, then issues real kanban_create calls with dependencies, budgets, goal_mode verification, and human gates. The deep-integration skill of the missions.md system.
-version: 1.4.0
+version: 1.4.1
 platforms: [linux, macos, windows]
 metadata:
   hermes:
@@ -89,7 +89,7 @@ Run every check, then report a single Go/No-Go poll. Two severities:
 | Check | Why it's mechanical |
 |---|---|
 | At least one profile exists and every planned assignee is on the list | Unknown assignees are silently dropped |
-| Dispatcher is running | Cards would sit unclaimed. Probe correctly: `kanban.dispatch_in_gateway` in `~/.hermes/config.yaml` true-or-absent **plus** the gateway service active means the dispatcher runs **embedded in the gateway** — confirm via the `kanban dispatcher: embedded in gateway` line in gateway.log. Do NOT grep for a standalone daemon process; an embedded dispatcher shows none, and that absence is not a NO-GO |
+| Dispatcher is running | Cards would sit unclaimed. Probe correctly: the `kanban.dispatch_in_gateway` key in the agent's main `config.yaml` (in the Hermes home directory) true-or-absent **plus** the gateway service active means the dispatcher runs **embedded in the gateway** — confirm via the `kanban dispatcher: embedded in gateway` line in gateway.log. Do NOT grep for a standalone daemon process; an embedded dispatcher shows none, and that absence is not a NO-GO |
 | Flight Plan has at least one Success Criterion | `goal_mode` judges against acceptance criteria; no criteria = blind judge |
 
 **ADVISORY (intent quality — report specifically, operator may override with a word):**
