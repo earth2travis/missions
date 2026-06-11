@@ -64,6 +64,10 @@ Post-board direct-fix work (operator-authorized, hands: sivart) is not in the ru
 - **Token telemetry has holes.** Four of sixteen runs reported nothing. The ledger's totals row is honest about this, but the budget line in the next Flight Plan cannot be reconciled against actuals.
 - **Framework risk materialized as diagnosis cost, not failure.** vinext 0.1.1 consumed one timeout, two repair cards, and the entire direct-fix tail. The Flight Plan's pause clause ("repair or work around it within budget, pause rather than swap frameworks silently") held: nobody swapped frameworks, and the operator made every escalation call.
 
+## Operator Verdict
+
+Asked directly, criteria aside: did you get what you meant? Operator, 2026-06-11: "Yes. The site is live and styled." Paragraph 2 holds; no gap to append.
+
 ## Lessons
 
 - **For the next Flight Plan:** any criterion of the form "live and returning 200" must name its verification fallback when tooling is blocked (a different host, the operator's own browser, an API status check). A worker that cannot run its verification must block, not complete. This would have converted both premature completions into review-required handoffs.
